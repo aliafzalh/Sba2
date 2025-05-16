@@ -1,0 +1,1 @@
+This project is built for **SBA 308: JavaScript Fundamental**. It processes assignment data and learner submissions to calculate individual learner scores and averages.
