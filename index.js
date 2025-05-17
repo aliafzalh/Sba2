@@ -108,26 +108,70 @@ const CourseInfo = {
       }
       console.table(assignmentLookup)
 
-  
-    const result = [
-      {
-        id: 125,
-        avg: 0.985, // (47 + 150) / (50 + 150)
-        1: 0.94, // 47 / 50
-        2: 1.0, // 150 / 150
-      },
-      {
-        id: 132,
-        avg: 0.82, // (39 + 125) / (50 + 150)
-        1: 0.78, // 39 / 50
-        2: 0.833, // late: (140 - 15) / 150
-      },
-    ];
-  
-    return result;
+      const learnerIds = [...new Set(submissions.map(s => s.learner_id))];
+  const results = [];
+
+  for (let id of learnerIds) {
+    const learnerResult = { id };
+    let totalScore = 0;
+    let totalPossible = 0;
+
+    const learnerSubmissions = submissions.filter(s => s.learner_id === id);
+
+    for (let submission of learnerSubmissions) {
+      const assignmentId = submission.assignment_id;
+      const assignment = assignmentLookup[assignmentId];
+      if (!assignment) continue;
+
+      const score = submission.submission.score;
+      const submittedAt = new Date(submission.submission.submitted_at);
+      const dueDate = assignment.due_at;
+
+      // Ignore future-due assignments
+      if (dueDate > new Date()) continue;
+
+      let adjustedScore = score;
+
+      // Apply 10% deduction if late
+      if (submittedAt > dueDate) {
+        adjustedScore = +(score - score * 0.1).toFixed(2);
+      }
+
+      const normalized = +(adjustedScore / assignment.points_possible).toFixed(3);
+      learnerResult[assignmentId] = normalized;
+
+      totalScore += adjustedScore;
+      totalPossible += assignment.points_possible;
+    }
+
+    learnerResult.avg = totalPossible > 0
+      ? +(totalScore / totalPossible).toFixed(3)
+      : 0;
+
+    results.push(learnerResult);
   }
+
+  return results;
+}
+  //   const result = [
+  //     {
+  //       id: 125,
+  //       avg: 0.985, // (47 + 150) / (50 + 150)
+  //       1: 0.94, // 47 / 50
+  //       2: 1.0, // 150 / 150
+  //     },
+  //     {
+  //       id: 132,
+  //       avg: 0.82, // (39 + 125) / (50 + 150)
+  //       1: 0.78, // 39 / 50
+  //       2: 0.833, // late: (140 - 15) / 150
+  //     },
+  //   ];
+  
+  //   return result;
+  // }
   
   const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
   
-  console.log(result);
+  console.table(result);
   
