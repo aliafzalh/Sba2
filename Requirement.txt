@@ -1,0 +1,51 @@
+function getLearnerData(course, ag, submissions) {
+
+  /*
+
+    here, we would process this data to achieve the desired result.
+
+    1. first figure out who are the students
+    generate an array of unique students ids
+    generate an array of students ids -> [125,125,125,132,132]
+    generate the array from submissions data then make it unique -> [125,132]
+
+    2. convert it into array of object where you have a key called id
+    then value be studendid -> [{id:125},{id:132}]
+
+    3. get the assignments and calulcate the grade
+    find the assignment for each student and thier score
+    -> [{id:125,1:47,2:150,3:400},{id:132,1:32,2:140}]
+    now you have an object for each student that has score
+
+    4. we need to calculate the grade
+    go every student and match assignment using id to find points points_possible
+    you just divide the score by points points_possible
+    -> [{id:125,1:0.94,2:1.0}]
+    avg (add assignment scores together )/ (points possible)
+    remove not due assignments
+
+    const result = [
+      {
+        id: 125,
+        avg: 0.985, // (47 + 150) / (50 + 150)
+        1: 0.94, // 47 / 50
+        2: 1.0, // 150 / 150
+      },
+      {
+        id: 132,
+        avg: 0.82, // (39 + 125) / (50 + 150)
+        1: 0.78, // 39 / 50
+        2: 0.833, // late: (140 - 15) / 150
+      },
+    ];
+
+  */
+ 
+  // let result = [];
+  // write some code that makes results like that
+  // for (let i = 0; i < submissions.length; i++) {
+  //   //
+  // }
+  // result [125,125,125,32,32]
+  // return result;
+}

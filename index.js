@@ -108,51 +108,120 @@ const CourseInfo = {
       }
       console.table(assignmentLookup)
 
-      const learnerIds = [...new Set(submissions.map(s => s.learner_id))];
-  const results = [];
 
-  for (let id of learnerIds) {
-    const learnerResult = { id };
-    let totalScore = 0;
-    let totalPossible = 0;
+      const learners = {};
 
-    const learnerSubmissions = submissions.filter(s => s.learner_id === id);
 
-    for (let submission of learnerSubmissions) {
-      const assignmentId = submission.assignment_id;
-      const assignment = assignmentLookup[assignmentId];
-      if (!assignment) continue;
-
-      const score = submission.submission.score;
-      const submittedAt = new Date(submission.submission.submitted_at);
-      const dueDate = assignment.due_at;
-
-      // Ignore future-due assignments
-      if (dueDate > new Date()) continue;
-
-      let adjustedScore = score;
-
-      // Apply 10% deduction if late
-      if (submittedAt > dueDate) {
-        adjustedScore = +(score - score * 0.1).toFixed(2);
+      if (ag.course_id !== course.id) {
+        throw new Error("AssignmentGroup's course_id does not match the CourseInfo.id.")
       }
+    
+      for (let i = 0; i < submissions.length; i++) {
+    
+    
+        const submission = submissions[i];
+        const learner_id = submission.learner_id;
+        const assignment_id = submission.assignment_id;
+        const sub = submission.submission;
+        
+    
+    
+        let assignment = null;
+        let j = 0; 
+        while (j < ag.assignments.length) {
+          if (ag.assignments[j].id === assignment_id) {
+            assignment = ag.assignments[j]; // This is the asignment we're loking for.
+            break;  // when I found the assigment i want, I break my loop for assigments.
+          }
+              j++
+        }
+         if(!learners[learner_id]){
+        learners[learner_id] = {
+          id: learner_id,
+          avg: 0,
+          assignments: {},
+          score:0,
+          points:0,
+        }
+        };
+    
+    
+        const learner = learners[learner_id];
+    
+        try {
+          const pointsPossible = assignment.points_possible; 
+          if (pointsPossible === 0) throw new Error("Points possible cannot be zero."); {
+            let score = sub.score;// varibable for score
+    
+            if (new Date(sub.submitted_at) > new Date(assignment.due_at)) {
+    
+              score = score * 0.90;
+            }
+    
+            const percentage = score / pointsPossible;
+            learner.assignments[assignment_id] = percentage;
+            learner.points += pointsPossible
+            learner.score += score
+            learner.avg = learner.score / learner.points
+    
+          }
+        } catch (error) {
+          console.error("Error processing submission:", error)
+        }
+    
+      }
+      console.table(learners)};
+      const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+    
+      console.table(result);
+    
 
-      const normalized = +(adjustedScore / assignment.points_possible).toFixed(3);
-      learnerResult[assignmentId] = normalized;
+  //     const learnerIds = [...new Set(submissions.map(s => s.learner_id))];
+  // const results = [];
 
-      totalScore += adjustedScore;
-      totalPossible += assignment.points_possible;
-    }
+  // for (let id of learnerIds) {
+  //   const learnerResult = { id };
+  //   let totalScore = 0;
+  //   let totalPossible = 0;
 
-    learnerResult.avg = totalPossible > 0
-      ? +(totalScore / totalPossible).toFixed(3)
-      : 0;
+  //   const learnerSubmissions = submissions.filter(s => s.learner_id === id);
 
-    results.push(learnerResult);
-  }
+  //   for (let submission of learnerSubmissions) {
+  //     const assignmentId = submission.assignment_id;
+  //     const assignment = assignmentLookup[assignmentId];
+  //     if (!assignment) continue;
 
-  return results;
-}
+  //     const score = submission.submission.score;
+  //     const submittedAt = new Date(submission.submission.submitted_at);
+  //     const dueDate = assignment.due_at;
+
+  //     // Ignore future-due assignments
+  //     if (dueDate > new Date()) continue;
+
+  //     let adjustedScore = score;
+
+  //     // Apply 10% deduction if late
+  //     if (submittedAt > dueDate) {
+  //       adjustedScore = +(score - score * 0.1).toFixed(2);
+  //     }
+
+  //     const normalized = +(adjustedScore / assignment.points_possible).toFixed(3);
+  //     learnerResult[assignmentId] = normalized;
+
+  //     totalScore += adjustedScore;
+  //     totalPossible += assignment.points_possible;
+  //   }
+
+  //   learnerResult.avg = totalPossible > 0
+  //     ? +(totalScore / totalPossible).toFixed(3)
+  //     : 0;
+
+  //   results.push(learnerResult);
+  // }
+
+  // return results;
+//}
+
   //   const result = [
   //     {
   //       id: 125,
@@ -171,7 +240,5 @@ const CourseInfo = {
   //   return result;
   // }
   
-  const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-  
-  console.table(result);
+
   
